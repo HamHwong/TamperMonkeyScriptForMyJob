@@ -27,11 +27,24 @@
         this.relativeX = 0;
         this.relativeY = 0;
         this.isdrag = false;
+        this.debug = true;
         this.init = function () {
+            this.debugmode();
             this.initHtml();
             this.initStyle();
             this.initMouseEvent();
 
+        }
+        this.debugmode = function () {
+            if (!this.debug) return;
+            this.initdebugEvent()
+        }
+        this.initdebugEvent = function () {
+            var inputs = document.querySelector("iframe[name='gsft_main']").contentDocument.getElementsByTagName("input")
+            for (var i = 0; i < inputs.length; i++) {
+                var item = inputs[i]
+                item.setAttribute("draggable", "true")
+            }
         }
         this.initHtml = function () {
             console.log('初始化中...')
@@ -41,10 +54,10 @@
                                   <div class="menuLists"></div>
                               </div>`)
 
-            for (var i in this.plugsConfig.lists) {
+            for (var i in this.Config.lists) {
                 (function (i) {
                     var item = $(`<span class="plugsRow">${i}</span>`)
-                    var funcOrName = this.plugsConfig.lists[i]
+                    var funcOrName = this.Config.lists[i]
                     console.log(funcOrName)
                     var func = null;
                     if (null == funcOrName) {
@@ -54,16 +67,16 @@
                     } else if ("function" == typeof funcOrName) {
                         func = funcOrName
                     } else if ("string" == typeof funcOrName) {
-                        if ("function" == typeof this.plugsConfig.method[funcOrName]) {
-                            func = this.plugsConfig.method[funcOrName]
+                        if ("function" == typeof this.Config.method[funcOrName]) {
+                            func = this.Config.method[funcOrName]
                         } else {
                             func = function () {
                                 alert(funcOrName + " 这个函数未定义!,请在methods中定义")
                             }
                         }
                     }
-
-                    item.on('click', func)
+                    //绑定点击事件
+                    item.on('click', func.bind(this))
                     structure.find(".menuLists").append(item)
                 }).apply(this, [i])
             }
@@ -73,7 +86,7 @@
         this.initStyle = function () {
             console.log('载入结构完成')
             //载入样式
-            $("body").append(`<style>${this.plugsConfig.style}</style>`)
+            $("body").append(`<style>${this.Config.style}</style>`)
             //ENd
             console.log('样式载入')
         }
@@ -112,7 +125,7 @@
             }
             console.log('初始化鼠标事件完成...')
         }
-        this.plugsConfig = {
+        this.Config = {
             style: `#plugsMenu {
               position: absolute;
               top: 0;
@@ -163,7 +176,7 @@
               }
       `,
             lists: {
-                "Retrieval": "raiseRetrieval",
+                "Retrieval": "fillRetrievalTicket",
                 "Disk Wipe": "Disk Wipe function",
                 "Request New Asset": "Request New Asset function",
                 "unlock": "unlock"
@@ -172,23 +185,48 @@
                 unlock: function () {
                     const whiteList = ["sc_task.do", "incident.do", "u_incident_task.do"]
 
-                    if (whiteList.find((v, i) => {
-                            return document.querySelector("iframe").contentWindow.location.pathname == "/" + v
-                        })) {
+                    if (this.Config.utils.ifMatchIframePath(whiteList)) {
                         document.querySelector("#gsft_main").contentDocument.querySelectorAll("*[readonly=readonly]").forEach(function (elem) {
                             elem.removeAttribute('readonly');
                             elem.removeAttribute("disabled");
                         })
-                        alert('Unlocked!')
+                        alert('Unlocked!');
 
                     } else {
                         alert('解锁失败，请不要在其他页面尝试解锁')
                     }
                 },
-                raiseRetrieval: function () {
+                fillRetrievalTicket: function () {
+                    const whiteList = ["com.glideapp.servicecatalog_cat_item_view.do"]
+                    if (this.Config.utils.ifMatchIframePath(whiteList)) {
+                        let filedsArray = this.Config.utils.loadFieldConfig();
+                        filedsArray.forEach(item => {
+                            var hash = item.key;
+                            var name = item.value;
+                            
+                        })
+                        this.Config.utils.textInputFillAndTriggerEvent();
+                    } else {
+                        alert('填写失败，请不要在其他页面尝试填写');
+                    }
+                }
+            },
+            utils: {
+                ifMatchIframePath: function (pathList) {
+                    return null != pathList.find((v, i) => {
+                        return document.querySelector("iframe").contentWindow.location.pathname == "/" + v
+                    })
+                },
+                loadFieldConfig: function () {
+                    //获取到该页面的参数配置，并生成一个节点队列
+                },
+                textInputFillAndTriggerEvent: function (inputElement, value) {
+                    if ($(inputElement).exist()) {
 
+                    }
                 }
             }
+
         }
 
     }
