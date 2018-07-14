@@ -199,13 +199,8 @@
                 fillRetrievalTicket: function () {
                     const whiteList = ["com.glideapp.servicecatalog_cat_item_view.do"]
                     if (this.Config.utils.ifMatchIframePath(whiteList)) {
-                        let filedsArray = this.Config.utils.loadFieldConfig();
-                        filedsArray.forEach(item => {
-                            var hash = item.key;
-                            var name = item.value;
-                            
-                        })
-                        this.Config.utils.textInputFillAndTriggerEvent();
+                        let dataHashMap = bindDataTitleWithNodeId()
+                        this.Config.utils.textInputFillAndTriggerEvent(dataHashMap);
                     } else {
                         alert('填写失败，请不要在其他页面尝试填写');
                     }
@@ -217,8 +212,32 @@
                         return document.querySelector("iframe").contentWindow.location.pathname == "/" + v
                     })
                 },
-                loadFieldConfig: function () {
-                    //获取到该页面的参数配置，并生成一个节点队列
+                initCurrentFieldsMap: function () {
+                    //初始化当前页面所有待填字段的Hash映射
+                    let set = {}
+                    jQuery("#variable_map").find("item").toArray().forEach(item => {
+                        var fieldId = item.getAttribute("id")
+                        var name = item.getAttribute("qname")
+                        set[name] = fieldId
+                    })
+                    return set
+                },
+                loadFieldMapedConfig: function () {
+                    //获取字符字段与页面字段的对应映射，并生成一个节点队列
+                    return {title:"requested_for"}
+                },
+                bindDataTitleWithNodeId:function(){
+                    //将用户数据id和节点id进行绑定
+                    let currentFiledsHashMap = initCurrentFieldsMap(); //初始化当前页面待填字段的映射,考虑缓存 页面数据id:真实节点ID
+                    let filedsArray = this.Config.utils.loadFieldMapedConfig();//获取已配置的字符数据对应字段的节点们,考虑缓存 用户数据title:页面数据id
+                    let dataWithNodeMap = {}
+                    for (name in filedsArray) {
+                        var fieldId = filedsArray[name]
+                        debugger
+                        var fieldInputNodeHash = currentFiledsHashMap[fieldId]
+                        dataWithNodeMap[fieldId] = fieldInputNodeHash
+                    }
+                    return dataWithNodeMap
                 },
                 textInputFillAndTriggerEvent: function (inputElement, value) {
                     if ($(inputElement).exist()) {
