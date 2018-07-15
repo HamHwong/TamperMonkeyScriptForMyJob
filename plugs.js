@@ -44,9 +44,15 @@
             this.initdebugEvent()
         }
         this.initdebugEvent = function () {
-            let inputs = document.querySelector("iframe[name='gsft_main']").contentDocument.getElementsByTagName("input")
+            let iframe = this.getIFrame()
+            let inputs = iframe.contentDocument.getElementsByTagName("input")
+            let selects = iframe.contentDocument.getElementsByTagName("select")
             for (let i = 0; i < inputs.length; i++) {
                 let item = inputs[i]
+                item.setAttribute("draggable", "true")
+            }
+            for(let j = 0 ; j <selects.length;j++){
+                let item = selects[j]
                 item.setAttribute("draggable", "true")
             }
         }
@@ -101,7 +107,7 @@
                     this.dataHashMap = this.Config.utils.bindDataTitleWithNodeId();
                     console.log("数据绑定结束..")
                 }
-
+                
                 // alert('子框架变了!');
             }.bind(this)
         }
@@ -152,7 +158,6 @@
             // let version = parseInt(plugsConfig.ver.split(".").join(""))
             // if (plugsConfig && plugsConfig.ver) {
             if (!plugsConfig) {
-
                 let configObject = {
                     ver: 1.0,
                     fieldsMap: {
@@ -161,8 +166,7 @@
                         }
                     }
                 }
-                
-                localStorage.setItem("BMS_PlugsConfig",JSON.stringify(configObject))
+                localStorage.setItem("BMS_PlugsConfig", JSON.stringify(configObject))
             }
         }
         this.Config = {
@@ -241,9 +245,11 @@
                     if (this.Config.utils.ifMatchIframePath(whiteList)) {
                         //获取该页面的数据Map
                         let dataHashMap = this.dataHashMap
+                        //真实数据
                         let object = {
-                            title: 'HHHHH'
+                            title: 'Agnieszka Ostachowska'
                         }
+                        //End
 
                         for (var dataNameInExcelString in dataHashMap) {
                             let value = object[dataNameInExcelString]
@@ -253,26 +259,6 @@
                     } else {
                         alert('填写失败，请不要在其他页面尝试填写');
                     }
-                },
-                devTest: function () {
-                    var evt = new KeyboardEvent("keydown", {
-                        key: "Tab",
-                        code: "Tab",
-                        location: 0,
-                        ctrlKey: false,
-                        shiftKey: false,
-                        altKey: false,
-                        metaKey: false,
-                        repeat: false,
-                        isComposing: false,
-                        charCode: 0,
-                        keyCode: 9,
-                        which: 9
-                    })
-                    var iframe = $(this.getIFrame()).contents()
-                    var inp = iframe.find("#sys_display\\.IO\\:bb43d80c89393400f283af8e80bb86f4")[0]
-                    inp.value = "hh"
-                    inp.ac.keyDown(evt)
                 }
             },
             utils: {
@@ -282,9 +268,6 @@
                 },
                 getFieldsMap: function (name) {
                     let config = JSON.parse(localStorage.getItem("BMS_PlugsConfig"))
-                    // if(!config){
-                    //     this.
-                    // }
                     // JSON.parse(config)
                     return config.fieldsMap[name]
                 },
