@@ -41,21 +41,44 @@
         }
         this.debugmode = function () {
             if (!this.debug) return;
+            this.debugDialog();
             this.initdebugEvent()
+        }
+        this.debugDialog = function () {
+            //toggle Debug的对话框
+            if (!this.dataHashMap) return
+            var node = document.createElement("div")
+            // var table = document.createElement("table")
+            // var header = document.createElement("tr")
+            // var columnForDataName = document.createElement("th")
+            // columnForDataName.innerText = "数据"
+            // var columnForNode = document.createElement("th")
+            // columnForNode.innerHTML = "节点"
+            // header.append(columnForDataName)
+            // header.append(columnForNode)
+            // table.appendChild(header)
+
+            for (var name in this.dataHashMap) {
+
+            }
+            node.appendChild()
         }
         this.initdebugEvent = function () {
             let iframe = this.getIFrame()
-            let inputs = iframe.contentDocument.getElementsByTagName("input")
-            let selects = iframe.contentDocument.getElementsByTagName("select")
-            for (let i = 0; i < inputs.length; i++) {
-                let item = inputs[i]
-                item.setAttribute("draggable", "true")
-            }
-            for(let j = 0 ; j <selects.length;j++){
-                let item = selects[j]
-                item.setAttribute("draggable", "true")
-            }
+            // let inputs = iframe.contentDocument.getElementsByTagName("input")
+            // let selects = iframe.contentDocument.getElementsByTagName("select")
+            // for (let i = 0; i < inputs.length; i++) {
+            //     let item = inputs[i]
+            //     item.setAttribute("draggable", "true")
+            // }
+            // for (let j = 0; j < selects.length; j++) {
+            //     let item = selects[j]
+            //     item.setAttribute("draggable", "true")
+            // }
+
+            console.log("设置模式初始化完成！")
         }
+
         this.getIFrame = function () {
             return this.Config.utils.getIFrame();
         }
@@ -93,7 +116,7 @@
                     structure.find(".menuLists").append(item)
                 }).apply(this, [i])
             }
-
+            //绑定子框架的onload事件
             $("header[role='banner']").append(structure)
             this.iFrame = this.Config.utils.getIFrame();
             this.iFrame.onload = function () {
@@ -107,7 +130,7 @@
                     this.dataHashMap = this.Config.utils.bindDataTitleWithNodeId();
                     console.log("数据绑定结束..")
                 }
-                
+
                 // alert('子框架变了!');
             }.bind(this)
         }
@@ -154,6 +177,7 @@
             console.log('初始化鼠标事件完成...')
         }
         this.initPlugsConfig = function () {
+            //TODO 初始化插件配置属性,并将其存入LocalStorage
             let plugsConfig = localStorage.getItem("BMS_PlugsConfig")
             // let version = parseInt(plugsConfig.ver.split(".").join(""))
             // if (plugsConfig && plugsConfig.ver) {
@@ -254,7 +278,16 @@
                         for (var dataNameInExcelString in dataHashMap) {
                             let value = object[dataNameInExcelString]
                             let fieldNode = dataHashMap[dataNameInExcelString]
-                            this.Config.utils.textInputFillAndTriggerEvent(fieldNode, value)
+                            switch (fieldNode.nodeName) {
+                                case "INPUT":
+                                    this.Config.utils.textInputFillAndTriggerEvent(fieldNode, value)
+                                    break;
+
+                                case "SELECT":
+                                    this.Config.utils.selectChangeAndTriggerEvent(fieldNode, value)
+                                    break;
+                            }
+
                         }
                     } else {
                         alert('填写失败，请不要在其他页面尝试填写');
@@ -289,7 +322,7 @@
                     return set
                 },
                 loadFieldMapedConfig: function (currentFiledsHashMap) {
-                    //获取字符字段与页面字段的对应映射，并生成一个原生节点队列
+                    //获取字符字段与页面字段的对应映射，并生成一个 原生 节点队列
                     let filedsMapSet = this.getFieldsMap("Retrieval")
                     let dataWithNodeMap = {}
 
@@ -305,11 +338,17 @@
                 },
                 bindDataTitleWithNodeId: function () {
                     //将用户数据id和节点id进行绑定
+                    //从页面上获取到字段
                     let currentFiledsHashMap = this.initCurrentFieldsMap(); //初始化当前页面待填字段的映射,考虑缓存 页面数据id:真实节点ID
+                    //从缓存中获取到配置字段
                     let dataWithNodeMap = this.loadFieldMapedConfig(currentFiledsHashMap); //获取已配置的字符数据对应字段的节点们,考虑缓存 用户数据title:页面数据id
                     return dataWithNodeMap
                 },
                 textInputFillAndTriggerEvent: function (inputElement, value) {
+                    if ("INPUT" != inputElement.nodeName ||
+                        "checkbox" == inputElement.type ||
+                        "hidden" == inputElement.type ||
+                        "radio" == inputElement.type) return
                     //fill
                     inputElement.value = value
                     //trigger
@@ -328,6 +367,12 @@
                         which: 9
                     })
                     inputElement.ac.keyDown(evt)
+                },
+                selectChangeAndTriggerEvent: function (selectElement, value) {
+                    if ("SELECT" != selectElement.nodeName) return
+                    selectElement.value = value;
+                    var evt = new Event("change");
+                    selectElement.dispatchEvent(evt);
                 }
             }
 
