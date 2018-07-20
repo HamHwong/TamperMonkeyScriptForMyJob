@@ -40,30 +40,37 @@
 
         }
         this.debugmode = function () {
+            debugger
             if (!this.debug) return;
-            this.debugDialog();
-            this.initdebugEvent()
+            this.initDebugDialog();
+            this.initDebugEvent()
         }
-        this.debugDialog = function () {
+        this.initDebugDialog = function () {
             //toggle Debug的对话框
-            if (!this.dataHashMap) return
-            var node = document.createElement("div")
-            // var table = document.createElement("table")
-            // var header = document.createElement("tr")
-            // var columnForDataName = document.createElement("th")
-            // columnForDataName.innerText = "数据"
-            // var columnForNode = document.createElement("th")
-            // columnForNode.innerHTML = "节点"
-            // header.append(columnForDataName)
-            // header.append(columnForNode)
-            // table.appendChild(header)
-
-            for (var name in this.dataHashMap) {
-
+            // if (!this.dataHashMap) return
+            // if(!this.debug) return
+            var dialogNode = document.getElementById("plug_debug_mode_dialog")
+            if (!dialogNode) {
+                var structure = `
+                    <div id="plug_debug_mode_dialog" style="background-color:#fff;padding:20px;position:absolute;z-index:9999;right:0px;">
+                        <table style="border:solid 1px #000;">
+                            <tr>
+                                <th>Title</th>
+                                <th>Node</th>
+                            </tr>
+                        </table>
+                    </div>`
+                var $_structure = $(structure)
+                $("body").append($_structure)
+            }else{
+                
             }
-            node.appendChild()
+
+            // for (var name in this.dataHashMap) {
+
+            // }
         }
-        this.initdebugEvent = function () {
+        this.initDebugEvent = function () {
             let iframe = this.getIFrame()
             // let inputs = iframe.contentDocument.getElementsByTagName("input")
             // let selects = iframe.contentDocument.getElementsByTagName("select")
@@ -379,4 +386,6 @@
         }
 
     }
+
+
 })(jQuery);
