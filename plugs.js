@@ -32,7 +32,7 @@
         this.iFrameChanged = true;
         this.dataHashMap = null;
         this.init = function () {
-            this.debugmode();
+
             this.initHtml();
             this.initStyle();
             this.initMouseEvent();
@@ -49,26 +49,57 @@
             //toggle Debug的对话框
             // if (!this.dataHashMap) return
             // if(!this.debug) return
-            var dialogNode = document.getElementById("plug_debug_mode_dialog")
-            if (!dialogNode) {
-                var structure = `
-                    <div id="plug_debug_mode_dialog" style="background-color:#fff;padding:20px;position:absolute;z-index:9999;right:0px;">
-                        <table style="border:solid 1px #000;">
-                            <tr>
+            var dialogNode = $("#plug_debug_mode_dialog")
+            var header = $(`<tr>
                                 <th>Title</th>
                                 <th>Node</th>
-                            </tr>
+                            </tr>`)
+            if (dialogNode.length <= 0) {
+                var structure = `
+                    <div id="plug_debug_mode_dialog" style="background-color:#fff;position:absolute;z-index:9999;right:0px;top:300px;overflow:scroll;max-height:360px">
+                        <table border="8" cellpadding="10">
+                            <tbody id="plug_debug_mode_dialog_table_body">
+                            
+                            </tbody>
                         </table>
                     </div>`
                 var $_structure = $(structure)
                 $("body").append($_structure)
-            }else{
-                
             }
+            $("#plug_debug_mode_dialog_table_body").empty().append(header)
+            for (var name in this.dataHashMap) {
+                if (!this.dataHashMap[name]) continue
+                var row = $(`
+                <tr>
+                    <td>${name}</td>
+                </tr>
+                `)
+                var nodeElement = this.dataHashMap[name]
+                var td = $('<td>Hover Show</td>');
+                (function (td, nodeElement, $) {
+                    td.on({
+                        "mouseover": function () {
+                            $(nodeElement).css("background-color", "rgba(45,45,45,0.2)")
+                        },
+                        "mouseout": function () {
+                            $(nodeElement).css("background-color", "")
+                        },
+                        "dblclick": function () {
+                            //双击给赋值
+                            console.log("dbclick done!")
+                            // document.onmouseover = function (e) {
+                            //     console.log(e)
+                            // }
+                            // document.onclick = function (e) {
+                            //     console.log(e)
+                            // }
+                        }
+                    })
+                })(td, nodeElement, $)
 
-            // for (var name in this.dataHashMap) {
-
-            // }
+                row.append(td)
+                $("#plug_debug_mode_dialog_table_body").append(row)
+            }
         }
         this.initDebugEvent = function () {
             let iframe = this.getIFrame()
@@ -135,6 +166,7 @@
                 if (this.Config.utils.ifMatchIframePath(whiteList)) {
                     //将该子页面的节点和数据进行绑定
                     this.dataHashMap = this.Config.utils.bindDataTitleWithNodeId();
+                    this.debugmode();
                     console.log("数据绑定结束..")
                 }
 
@@ -188,17 +220,75 @@
             let plugsConfig = localStorage.getItem("BMS_PlugsConfig")
             // let version = parseInt(plugsConfig.ver.split(".").join(""))
             // if (plugsConfig && plugsConfig.ver) {
-            if (!plugsConfig) {
-                let configObject = {
-                    ver: 1.0,
-                    fieldsMap: {
-                        Retrieval: {
-                            title: "requested_for"
-                        }
+            // if (!plugsConfig) {
+            let configObject = {
+                ver: 1.0,
+                fieldsMap: {
+                    Retrieval: {
+                        "additional_info": "additional_info",
+                        "alt_contact": "alt_contact",
+                        "asset_tag": "asset_tag",
+                        "assignment_group": "assignment_group",
+                        "attachment_button": "attachment_button",
+                        "business_justification": "business_justification",
+                        "cancelled_from_incident": "cancelled_from_incident",
+                        "chat_conversation": "chat_conversation",
+                        "cmdb_ci": "cmdb_ci",
+                        "contact_type": "contact_type",
+                        "delivery_priority": "delivery_priority",
+                        "device_type": "device_type",
+                        "docking_station": "docking_station",
+                        "end_ci": "end_ci",
+                        "end_peripherals": "end_peripherals",
+                        "esetup_number": "esetup_number",
+                        "external_ref_number": "external_ref_number",
+                        "filter_fulfillment_group": "filter_fulfillment_group",
+                        "form_factor": "form_factor",
+                        "group_approval": "group_approval",
+                        "group_approval_needed": "group_approval_needed",
+                        "inst_building": "inst_building",
+                        "inst_floor": "inst_floor",
+                        "inst_room": "inst_room",
+                        "inst_site": "inst_site",
+                        "keyboard": "keyboard",
+                        "lab_type": "lab_type",
+                        "manual_device_end": "manual_device_end",
+                        "manufacturer": "manufacturer",
+                        "monitor": "monitor",
+                        "mouse": "mouse",
+                        "new_asset_tag": "new_asset_tag",
+                        "new_cmdb_ci": "new_cmdb_ci",
+                        "new_device_type": "new_device_type",
+                        "new_docking_station": "new_docking_station",
+                        "new_form_factor": "new_form_factor",
+                        "new_install_building": "new_install_building",
+                        "new_install_floor": "new_install_floor",
+                        "new_install_room": "new_install_room",
+                        "new_install_site": "new_install_site",
+                        "new_keyboard": "new_keyboard",
+                        "new_lab_type": "new_lab_type",
+                        "new_manufacturer": "new_manufacturer",
+                        "new_monitor": "new_monitor",
+                        "new_mouse": "new_mouse",
+                        "new_other": "new_other",
+                        "new_serial_num": "new_serial_num",
+                        "new_unable_to_locate_ci": "new_unable_to_locate_ci",
+                        "only_show_devices_assigned_to_the_user": "only_show_devices_assigned_to_the_user",
+                        "other": "other",
+                        "outer_group_end": "outer_group_end",
+                        "request_type": "request_type",
+                        "requested_date": "requested_date",
+                        "title": "requested_for",
+                        "requestor_notification": "requestor_notification",
+                        "sales_force": "sales_force",
+                        "serial_num": "serial_num",
+                        "short_description": "short_description",
+                        "unable_to_locate_ci": "unable_to_locate_ci"
                     }
                 }
-                localStorage.setItem("BMS_PlugsConfig", JSON.stringify(configObject))
             }
+            localStorage.setItem("BMS_PlugsConfig", JSON.stringify(configObject))
+            // }
         }
         this.Config = {
             style: `#plugsMenu {
@@ -284,7 +374,8 @@
 
                         for (var dataNameInExcelString in dataHashMap) {
                             let value = object[dataNameInExcelString]
-                            let fieldNode = dataHashMap[dataNameInExcelString]
+                            let fieldNode = dataHashMap[dataNameInExcelString] ? dataHashMap[dataNameInExcelString] : null
+                            if (!fieldNode) continue
                             switch (fieldNode.nodeName) {
                                 case "INPUT":
                                     this.Config.utils.textInputFillAndTriggerEvent(fieldNode, value)
@@ -339,14 +430,19 @@
                         let iFrame = this.getIFrame()
                         let iFrameDocument = iFrame.contentDocument
                         let Node = iFrameDocument.getElementById("sys_display.IO:" + fieldInputNodeHash)
+                        if (!Node) Node = iFrameDocument.getElementById("IO:" + fieldInputNodeHash)
                         dataWithNodeMap[name] = Node
                     }
+                    console.log(dataWithNodeMap)
                     return dataWithNodeMap
                 },
                 bindDataTitleWithNodeId: function () {
                     //将用户数据id和节点id进行绑定
                     //从页面上获取到字段
                     let currentFiledsHashMap = this.initCurrentFieldsMap(); //初始化当前页面待填字段的映射,考虑缓存 页面数据id:真实节点ID
+                    // debugger
+                    this.currentFiledsHashMap = currentFiledsHashMap
+                    console.log(currentFiledsHashMap)
                     //从缓存中获取到配置字段
                     let dataWithNodeMap = this.loadFieldMapedConfig(currentFiledsHashMap); //获取已配置的字符数据对应字段的节点们,考虑缓存 用户数据title:页面数据id
                     return dataWithNodeMap
@@ -373,7 +469,11 @@
                         keyCode: 9,
                         which: 9
                     })
-                    inputElement.ac.keyDown(evt)
+                    if (inputElement.ac) {
+                        inputElement.ac.keyDown(evt)
+                    } else {
+                        inputElement.dispatchEvent(evt)
+                    }
                 },
                 selectChangeAndTriggerEvent: function (selectElement, value) {
                     if ("SELECT" != selectElement.nodeName) return
