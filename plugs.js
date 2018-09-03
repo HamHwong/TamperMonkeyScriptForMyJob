@@ -376,16 +376,7 @@
                             let value = object[dataNameInExcelString]
                             let fieldNode = dataHashMap[dataNameInExcelString] ? dataHashMap[dataNameInExcelString] : null
                             if (!fieldNode) continue
-                            switch (fieldNode.nodeName) {
-                                case "INPUT":
-                                    this.Config.utils.textInputFillAndTriggerEvent(fieldNode, value)
-                                    break;
-
-                                case "SELECT":
-                                    this.Config.utils.selectChangeAndTriggerEvent(fieldNode, value)
-                                    break;
-                            }
-
+                            this.Config.utils.triggerFieldEventByNode(fieldNode)
                         }
                     } else {
                         alert('填写失败，请不要在其他页面尝试填写');
@@ -480,6 +471,18 @@
                     selectElement.value = value;
                     var evt = new Event("change");
                     selectElement.dispatchEvent(evt);
+                },
+                triggerFieldEventByNode:function(fieldNode){
+                    if(null==fieldNode)return null;
+                    switch (fieldNode.nodeName) {
+                        case "INPUT":
+                            this.textInputFillAndTriggerEvent(fieldNode, value)
+                            break;
+
+                        case "SELECT":
+                            this.selectChangeAndTriggerEvent(fieldNode, value)
+                            break;
+                    }
                 }
             }
 
