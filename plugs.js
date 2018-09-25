@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMS Vitalize raise ticket plugs
 // @namespace    http://tampermonkey.net/
-// @version      0.15
+// @version      0.151
 // @description  try to take over the world!
 // @author       You
 // @match        *://bmsprod.service-now.com/navpage.do
@@ -27,7 +27,7 @@
         this.relativeX = 0;
         this.relativeY = 0;
         this.isdrag = false;
-        this.debug = true;
+        this.debug = false;
         this.iFrame = null;
         this.iFrameChanged = true;
         this.dataHashMap = null;
@@ -176,7 +176,8 @@
         this.initStyle = function () {
             console.log('载入结构完成')
             //载入样式
-            $("body").append(`<style>${this.Config.style}</style>`)
+            // $("body").append(`<style>${this.Config.style}</style>`)
+            
             //ENd
             console.log('样式载入')
         }
@@ -354,6 +355,12 @@
                         document.querySelector("#gsft_main").contentDocument.querySelectorAll("*[readonly=readonly]").forEach(function (elem) {
                             elem.removeAttribute('readonly');
                             elem.removeAttribute("disabled");
+                        })
+                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".readonly").forEach(function(elem){
+                            elem.removeClassName("readonly");
+                        })
+                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".disabled").forEach(function(elem){
+                            elem.removeClassName("disabled");
                         })
                         alert('Unlocked!');
 
