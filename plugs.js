@@ -27,7 +27,7 @@
         this.relativeX = 0;
         this.relativeY = 0;
         this.isdrag = false;
-        this.debug = false;
+        this.debug = true;
         this.iFrame = null;
         this.iFrameChanged = true;
         this.dataHashMap = null;
@@ -176,7 +176,7 @@
         this.initStyle = function () {
             console.log('载入结构完成')
             //载入样式
-            // $("body").append(`<style>${this.Config.style}</style>`)
+             $("body").append(`<style>${this.Config.style}</style>`)
             
             //ENd
             console.log('样式载入')
