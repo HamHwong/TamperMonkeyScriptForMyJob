@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMS Vitalize raise ticket plugs
 // @namespace    http://tampermonkey.net/
-// @version      0.151
+// @version      0.152
 // @description  try to take over the world!
 // @author       You
 // @match        *://bmsprod.service-now.com/navpage.do
@@ -16,6 +16,7 @@
     let $ = jQuery;
     window.onload = function () {
         if (window.pluged || window.parent.pluged) {
+            //避免重复启动
             return;
         }
         new plugWindow().init();
@@ -27,18 +28,22 @@
         this.relativeX = 0;
         this.relativeY = 0;
         this.isdrag = false;
-        this.debug = true;
+        this.debug = false;
         this.iFrame = null;
         this.iFrameChanged = true;
         this.dataHashMap = null;
         this.init = function () {
 
-            this.initHtml();
-            this.initStyle();
-            this.initMouseEvent();
-            this.initPlugsConfig();
+            this.initHtml(); //初始化结构
+            this.initStyle(); //初始化样式TODO
+            this.initMouseEvent(); //初始化鼠标事件
+            this.initPlugsConfig(); //初始化插件设置
+            this.debugmode(); //初始化Debug模式
 
         }
+        /**
+         * @description 当Debug为True时，加载Debug窗口
+         */
         this.debugmode = function () {
             debugger
             if (!this.debug) return;
@@ -120,6 +125,9 @@
         this.getIFrame = function () {
             return this.Config.utils.getIFrame();
         }
+        /**
+         * @description 初始化插件结构，并将对应this.Config.lists中的值绑定成选项
+         */
         this.initHtml = function () {
             console.log('初始化中...')
             console.log('载入结构')
@@ -129,6 +137,7 @@
                               </div>`)
 
             for (let i in this.Config.lists) {
+                //将this.Config.lists上配置的所有事件绑定到Plugs上
                 (function (i) {
                     let item = $(`<span class="plugsRow">${i}</span>`)
                     let funcOrName = this.Config.lists[i]
@@ -160,7 +169,6 @@
             this.iFrame.onload = function () {
                 //当子框架改变时,将iFrameChanged设置为true
                 this.iFrameChanged = true;
-
                 const whiteList = ["com.glideapp.servicecatalog_cat_item_view.do"]
                 // debugger
                 if (this.Config.utils.ifMatchIframePath(whiteList)) {
@@ -169,18 +177,22 @@
                     this.debugmode();
                     console.log("数据绑定结束..")
                 }
-
                 // alert('子框架变了!');
             }.bind(this)
         }
+        /**
+         * @description 初始化结构样式，将this.Config.Style插入页面
+         */
         this.initStyle = function () {
             console.log('载入结构完成')
             //载入样式
-             $("body").append(`<style>${this.Config.style}</style>`)
-            
-            //ENd
+            $("body").append(`<style>${this.Config.style}</style>`)
+            //END
             console.log('样式载入')
         }
+        /**
+         * @description 初始化鼠标事件，plugs拖拽事件
+         */
         this.initMouseEvent = function () {
             console.log('初始化鼠标事件中...')
             let plugsMenu = document.getElementById("plugsMenu");
@@ -216,6 +228,9 @@
             }
             console.log('初始化鼠标事件完成...')
         }
+        /**
+         * @description 初始化插件配置属性，将其存入LocalStorage
+         */
         this.initPlugsConfig = function () {
             //TODO 初始化插件配置属性,并将其存入LocalStorage
             let plugsConfig = localStorage.getItem("BMS_PlugsConfig")
@@ -291,6 +306,9 @@
             localStorage.setItem("BMS_PlugsConfig", JSON.stringify(configObject))
             // }
         }
+        /**
+         * @description 插件配置
+         */
         this.Config = {
             style: `#plugsMenu {
               position: absolute;
@@ -339,15 +357,23 @@
 
               #plugsMenu .plugsRow:active {
               background-color: #3775aa;
-              }
-      `,
+              }`,
+              /**
+               * @description 下拉菜单配置（显示名：函数名）
+               */
             lists: {
                 "Retrieval": "fillRetrievalTicket",
                 "Disk Wipe": "Disk Wipe function",
                 "Request New Asset": "devTest",
                 "unlock": "unlock"
             },
+            /**
+             * @description 下拉菜单对应方法
+             */
             method: {
+                /**
+                 * @description 解锁所有填选项，仅在未关闭的相关页面才能使用
+                 */
                 unlock: function () {
                     const whiteList = ["sc_task.do", "incident.do", "u_incident_task.do"]
 
@@ -356,10 +382,10 @@
                             elem.removeAttribute('readonly');
                             elem.removeAttribute("disabled");
                         })
-                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".readonly").forEach(function(elem){
+                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".readonly").forEach(function (elem) {
                             elem.removeClassName("readonly");
                         })
-                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".disabled").forEach(function(elem){
+                        document.querySelector("#gsft_main").contentDocument.querySelectorAll(".disabled").forEach(function (elem) {
                             elem.removeClassName("disabled");
                         })
                         alert('Unlocked!');
@@ -368,6 +394,9 @@
                         alert('解锁失败，请不要在其他页面尝试解锁')
                     }
                 },
+                /**
+                 * @description 根据excel表填单子
+                 */
                 fillRetrievalTicket: function () {
                     const whiteList = ["com.glideapp.servicecatalog_cat_item_view.do"]
                     if (this.Config.utils.ifMatchIframePath(whiteList)) {
@@ -390,21 +419,36 @@
                     }
                 }
             },
+            /**
+             * @description 工具方法
+             */
             utils: {
+                /**
+                 * @description 获取iFrame窗口对象
+                 */
                 getIFrame: function () {
                     //HACK TODO this 的作用域被限制再这个utils中了
                     return document.querySelectorAll("iframe#gsft_main")[0]
                 },
+                /**
+                 * @description 根据页面名字获取该页面所有参数映射对象
+                 */
                 getFieldsMap: function (name) {
                     let config = JSON.parse(localStorage.getItem("BMS_PlugsConfig"))
                     // JSON.parse(config)
                     return config.fieldsMap[name]
                 },
+                /**
+                 * @description 检测该页面是否在白名单中
+                 */
                 ifMatchIframePath: function (pathList) {
                     return null != pathList.find((v, i) => {
                         return document.querySelector("iframe").contentWindow.location.pathname == "/" + v
                     })
                 },
+                /**
+                 * @description 根据页面上variable_map节点获取到所有页面上字段对应的Hash映射，并返回一个set集合
+                 */
                 initCurrentFieldsMap: function () {
                     //初始化当前页面所有待填字段的Hash映射
                     let set = {}
@@ -417,6 +461,9 @@
                     })
                     return set
                 },
+                /**
+                 * @description 根据当前页面字段的HashMap，结合配置的页面与数据的映射（页面字段名：excel字段名）生成一个（excel字段名：页面字段真实节点）对象映射集
+                 */
                 loadFieldMapedConfig: function (currentFiledsHashMap) {
                     //获取字符字段与页面字段的对应映射，并生成一个 原生 节点队列
                     let filedsMapSet = this.getFieldsMap("Retrieval")
@@ -479,8 +526,8 @@
                     var evt = new Event("change");
                     selectElement.dispatchEvent(evt);
                 },
-                triggerFieldEventByNode:function(fieldNode){
-                    if(null==fieldNode)return null;
+                triggerFieldEventByNode: function (fieldNode) {
+                    if (null == fieldNode) return null;
                     switch (fieldNode.nodeName) {
                         case "INPUT":
                             this.textInputFillAndTriggerEvent(fieldNode, value)
