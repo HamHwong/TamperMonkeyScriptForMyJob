@@ -95,16 +95,35 @@
         constructor($node) {
             this.node = $($node);
             this.url = this.node.find("td:nth-child(2) a").attr("href");
+<<<<<<< HEAD
+=======
+            $("html").append(`
+            <style type="text/css">
+                .shown{
+                    display:block;
+                }
+                .hidden{
+                    display:none;
+                }
+            </style>
+            `);
+>>>>>>> dev
         }
         fill(detailObj) {
             console.log(detailObj);
             //到职日期
             if(detailObj.summary["What is the expected start date of the new hire"]){
+<<<<<<< HEAD
+=======
+                if($("#dzrq").length<=0)
+                $(".tablesortbody").find("tr:first").append(`<th class="tablehdr" nowrap="nowrap" scope="col" id="dzrq">到职日期</th>`)
+>>>>>>> dev
                 var expectedDate = detailObj.summary["What is the expected start date of the new hire"];
                 var datetypeDate = new Date(expectedDate);
                 var nowDate = new Date();
                 var daysToNow = Math.ceil((datetypeDate-nowDate)/(1000*60*60*24));
                 if(daysToNow<3){
+<<<<<<< HEAD
                     this.node.append(`<td class='tablebody'>${expectedDate}</td>`);
                 }else{
                     this.node.append(`<td class='tablebody' style='color:red;'>${expectedDate}</td>`);
@@ -114,6 +133,35 @@
                 this.node.append(`<td class='tablebody'></td>`);
             }
             //this.node.append(`<td class='tablebody'>${detailObj.Comments}</td>`);
+=======
+                    this.node.append(`<td class='tablebody' style='color:red;'>${expectedDate}</td>`);
+                }else{
+                    this.node.append(`<td class='tablebody' >${expectedDate}</td>`);
+                }
+            }else{
+                //占位,避免错位
+                if($("#dzrq").length<=0){
+                    $(".tablesortbody").find("tr:first").append(`<th class="tablehdr" nowrap="nowrap" scope="col" id="dzrq">到职日期</th>`);
+                }
+                this.node.append(`<td class='tablebody'></td>`);
+            }
+
+            if(detailObj["Comments"]||detailObj["意见"]){
+                var comments = detailObj["Comments"]||detailObj["意见"];
+                this.node.find("td:first").append(`<div class="comments hidden" style="position:relative;white-space:unset"><span style="position:absolute;width:300px;left:0px;top:0px;background-color:#ffffff;">${comments}</span></div>`);
+                this.node.find("td:first").hover(e=>{
+                    this.node.find(".comments").removeClass("hidden").removeClass("shown").addClass("shown");
+                },e=>{
+                    this.node.find(".comments").removeClass("hidden").removeClass("shown").addClass("hidden");
+                });
+
+                this.node.find(".comments").hover(e=>{
+                    this.node.find(".comments").removeClass("hidden").removeClass("shown").addClass("shown");
+                },e=>{
+                    this.node.find(".comments").removeClass("hidden").removeClass("shown").addClass("hidden");
+                })
+            }
+>>>>>>> dev
         }
     }
 })($);
